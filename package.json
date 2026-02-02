@@ -19,7 +19,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node -r tsconfig-paths/register src/seeds/seed.ts",
-    "seed:prod": "node dist/seeds/seed.js"
+    "seed:prod": "node dist/seeds/seed.js",
+    "vercel-build": "npm run build",
+    "vercel-start": "node dist/main"
   },
   "dependencies": {
     "@nestjs/cli": "^11.0.0",
