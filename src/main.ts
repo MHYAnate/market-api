@@ -1,54 +1,44 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const configService = app.get(ConfigService);
-  
-  // Global prefix
-  const apiPrefix = configService.get<string>('API_PREFIX') || 'api/v1';
-  app.setGlobalPrefix(apiPrefix);
-  
-  // CORS
-  app.enableCors({
-    origin: configService.get<string>('FRONTEND_URL') || 'http://localhost:3000',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log'],
   });
-  
-  // Global pipes
+
+  // CORS - Allow all
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*',
+    credentials: true,
+  });
+
+  // Global prefix
+  app.setGlobalPrefix('api/v1');
+
+  // Validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
+      forbidNonWhitelisted: true,
     }),
   );
-  
-  // Global filters
+
+  // Filters & Interceptors
   app.useGlobalFilters(new HttpExceptionFilter());
-  
-  // Global interceptors
   app.useGlobalInterceptors(new TransformInterceptor());
+
+  // Start server - Use PORT from environment (Render provides this)
+  const port = process.env.PORT || 3001;
+  await app.listen(port, '0.0.0.0');
   
-  // Static files (uploads)
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
-  
-  const port = configService.get<number>('PORT') || 3001;
-  await app.listen(port);
-  
-  console.log(`🚀 Application is running on: http://localhost:${port}/${apiPrefix}`);
+  console.log(`🚀 Server running on port ${port}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV}`);
 }
+
 bootstrap();
