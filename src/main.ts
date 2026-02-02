@@ -10,6 +10,12 @@ let cachedServer: any;
 
 async function bootstrapServer() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*',
+    credentials: true,
+  });
   const configService = app.get(ConfigService);
   
   // Global prefix
@@ -17,15 +23,7 @@ async function bootstrapServer() {
   app.setGlobalPrefix(apiPrefix);
   
   // CORS
-  app.enableCors({
-    origin: [
-      configService.get<string>('FRONTEND_URL') || 'http://localhost:3000',
-      'https://*.vercel.app',
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  });
+
   
   // Global pipes
   app.useGlobalPipes(
