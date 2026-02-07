@@ -17,7 +17,7 @@ import { UploadsModule } from './uploads/uploads.module';
       isGlobal: true,
       envFilePath: '.env',
       // Don't throw error if .env is missing (Vercel uses env vars directly)
-      ignoreEnvFile: process.env.NODE_ENV === 'production',
+      // ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
 
     // MongoDB Connection
@@ -55,10 +55,12 @@ import { UploadsModule } from './uploads/uploads.module';
     UploadsModule,
   ],
 })
-export class AppModule implements OnModuleInit {
-  private readonly logger = new Logger(AppModule.name);
+// export class AppModule implements OnModuleInit {
+//   private readonly logger = new Logger(AppModule.name);
 
-  async onModuleInit() {
-    this.logger.log('AppModule initialized successfully');
-  }
-}
+//   async onModuleInit() {
+//     this.logger.log('AppModule initialized successfully');
+//   }
+// }
+
+export class AppModule  {}

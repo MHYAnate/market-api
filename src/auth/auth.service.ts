@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../users/schemas/user.schema';
+import { ConfigService } from '@nestjs/config';
 
 export interface AuthResponse {
   user: User;
@@ -19,6 +20,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {

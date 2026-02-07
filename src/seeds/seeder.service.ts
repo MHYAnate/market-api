@@ -249,10 +249,18 @@ export class SeederService {
 
   private async seedGoods(vendors: VendorDocument[], users: UserDocument[]) {
     console.log('📦 Seeding goods...');
-
+  
     const verifiedVendors = vendors.filter((v) => v.status === VendorStatus.VERIFIED);
     const admin = users.find((u) => u.role === Role.ADMIN);
-
+  
+    // Get the actual users for each vendor
+    const vendorUsers = await this.userModel.find({
+      _id: { $in: verifiedVendors.map(v => v.user.toString()) }
+    });
+  
+    // Create a map of user IDs to user documents for quick lookup
+    const userMap = new Map(vendorUsers.map(u => [u._id.toString(), u]));
+  
     // Sample Cloudinary image URLs (using placeholder structure)
     const sampleImages = {
       electronics: [
@@ -281,7 +289,7 @@ export class SeederService {
         'https://res.cloudinary.com/dvawopdt3/image/upload/v1234567890/imagefolder/goods/camping-tent.jpg',
       ],
     };
-
+  
     const goodsData = [
       // Electronics (Tech Store)
       {
@@ -293,7 +301,7 @@ export class SeederService {
         images: [sampleImages.electronics[0]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[0]._id,
-        createdBy: users.find((u) => u.email === 'john@techstore.com')?._id,
+        createdBy: userMap.get(verifiedVendors[0].user.toString())?._id,
         location: 'Silicon Valley, CA',
         specifications: {
           brand: 'Apple',
@@ -306,6 +314,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'MacBook Pro 16" M3 Max',
@@ -316,7 +325,7 @@ export class SeederService {
         images: [sampleImages.electronics[1]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[0]._id,
-        createdBy: users.find((u) => u.email === 'john@techstore.com')?._id,
+        createdBy: userMap.get(verifiedVendors[0].user.toString())?._id,
         location: 'Silicon Valley, CA',
         specifications: {
           brand: 'Apple',
@@ -330,6 +339,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Samsung 65" OLED 4K Smart TV',
@@ -340,7 +350,7 @@ export class SeederService {
         images: [sampleImages.electronics[2]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[0]._id,
-        createdBy: users.find((u) => u.email === 'john@techstore.com')?._id,
+        createdBy: userMap.get(verifiedVendors[0].user.toString())?._id,
         location: 'Silicon Valley, CA',
         specifications: {
           brand: 'Samsung',
@@ -353,6 +363,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Professional Camera Kit for Rent',
@@ -363,7 +374,7 @@ export class SeederService {
         images: [sampleImages.electronics[0]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[0]._id,
-        createdBy: users.find((u) => u.email === 'john@techstore.com')?._id,
+        createdBy: userMap.get(verifiedVendors[0].user.toString())?._id,
         location: 'Silicon Valley, CA',
         specifications: {
           brand: 'Sony',
@@ -375,8 +386,9 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
-
+  
       // Vehicles (Auto Mall)
       {
         title: '2024 Tesla Model 3 Long Range',
@@ -387,7 +399,7 @@ export class SeederService {
         images: [sampleImages.vehicles[0]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[1]._id,
-        createdBy: users.find((u) => u.email === 'sarah@automall.com')?._id,
+        createdBy: userMap.get(verifiedVendors[1].user.toString())?._id,
         location: 'Detroit, MI',
         specifications: {
           make: 'Tesla',
@@ -401,6 +413,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: '2023 BMW X5 xDrive40i',
@@ -411,7 +424,7 @@ export class SeederService {
         images: [sampleImages.vehicles[1]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[1]._id,
-        createdBy: users.find((u) => u.email === 'sarah@automall.com')?._id,
+        createdBy: userMap.get(verifiedVendors[1].user.toString())?._id,
         location: 'Detroit, MI',
         specifications: {
           make: 'BMW',
@@ -425,6 +438,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Toyota Camry Monthly Lease',
@@ -435,7 +449,7 @@ export class SeederService {
         images: [sampleImages.vehicles[2]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[1]._id,
-        createdBy: users.find((u) => u.email === 'sarah@automall.com')?._id,
+        createdBy: userMap.get(verifiedVendors[1].user.toString())?._id,
         location: 'Detroit, MI',
         specifications: {
           make: 'Toyota',
@@ -448,8 +462,9 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
-
+  
       // Real Estate (Prime Properties)
       {
         title: 'Luxury Downtown Apartment',
@@ -460,7 +475,7 @@ export class SeederService {
         images: [sampleImages.realEstate[0]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[2]._id,
-        createdBy: users.find((u) => u.email === 'mike@realestate.com')?._id,
+        createdBy: userMap.get(verifiedVendors[2].user.toString())?._id,
         location: 'New York, NY',
         specifications: {
           propertyType: 'Apartment',
@@ -474,6 +489,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Modern Office Space for Lease',
@@ -484,7 +500,7 @@ export class SeederService {
         images: [sampleImages.realEstate[1]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[2]._id,
-        createdBy: users.find((u) => u.email === 'mike@realestate.com')?._id,
+        createdBy: userMap.get(verifiedVendors[2].user.toString())?._id,
         location: 'New York, NY',
         specifications: {
           propertyType: 'Commercial Office',
@@ -497,6 +513,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Beautiful Family Home - 4BR/3BA',
@@ -507,7 +524,7 @@ export class SeederService {
         images: [sampleImages.realEstate[2]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[2]._id,
-        createdBy: users.find((u) => u.email === 'mike@realestate.com')?._id,
+        createdBy: userMap.get(verifiedVendors[2].user.toString())?._id,
         location: 'New York, NY',
         specifications: {
           propertyType: 'Single Family Home',
@@ -521,8 +538,9 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
-
+  
       // Fashion (Style Shop)
       {
         title: 'Designer Evening Dress',
@@ -533,7 +551,7 @@ export class SeederService {
         images: [sampleImages.fashion[0]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[3]._id,
-        createdBy: users.find((u) => u.email === 'emily@styleshop.com')?._id,
+        createdBy: userMap.get(verifiedVendors[3].user.toString())?._id,
         location: 'Los Angeles, CA',
         specifications: {
           brand: 'Luxury Fashion',
@@ -546,6 +564,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Genuine Leather Jacket',
@@ -556,7 +575,7 @@ export class SeederService {
         images: [sampleImages.fashion[1]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[3]._id,
-        createdBy: users.find((u) => u.email === 'emily@styleshop.com')?._id,
+        createdBy: userMap.get(verifiedVendors[3].user.toString())?._id,
         location: 'Los Angeles, CA',
         specifications: {
           material: 'Genuine Leather',
@@ -568,6 +587,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Limited Edition Sneakers',
@@ -578,7 +598,7 @@ export class SeederService {
         images: [sampleImages.fashion[2]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[3]._id,
-        createdBy: users.find((u) => u.email === 'emily@styleshop.com')?._id,
+        createdBy: userMap.get(verifiedVendors[3].user.toString())?._id,
         location: 'Los Angeles, CA',
         specifications: {
           brand: 'Premium Sneakers',
@@ -590,8 +610,9 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
-
+  
       // Sports (Sports Gear Pro)
       {
         title: 'Commercial Treadmill',
@@ -602,7 +623,7 @@ export class SeederService {
         images: [sampleImages.sports[0]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[4]._id,
-        createdBy: users.find((u) => u.email === 'david@sportsgear.com')?._id,
+        createdBy: userMap.get(verifiedVendors[4].user.toString())?._id,
         location: 'Denver, CO',
         specifications: {
           brand: 'FitPro',
@@ -615,6 +636,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Mountain Bike - Carbon Frame',
@@ -625,7 +647,7 @@ export class SeederService {
         images: [sampleImages.sports[1]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[4]._id,
-        createdBy: users.find((u) => u.email === 'david@sportsgear.com')?._id,
+        createdBy: userMap.get(verifiedVendors[4].user.toString())?._id,
         location: 'Denver, CO',
         specifications: {
           frame: 'Carbon Fiber',
@@ -638,6 +660,7 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Camping Gear Rental Package',
@@ -648,7 +671,7 @@ export class SeederService {
         images: [sampleImages.sports[2]],
         status: GoodsStatus.APPROVED,
         vendor: verifiedVendors[4]._id,
-        createdBy: users.find((u) => u.email === 'david@sportsgear.com')?._id,
+        createdBy: userMap.get(verifiedVendors[4].user.toString())?._id,
         location: 'Denver, CO',
         specifications: {
           tentCapacity: '4 persons',
@@ -659,8 +682,9 @@ export class SeederService {
         approvedAt: new Date(),
         approvedBy: admin?._id,
         isAvailable: true,
+        createdAt: new Date(),
       },
-
+  
       // Pending Goods
       {
         title: 'Vintage Watch Collection',
@@ -671,10 +695,11 @@ export class SeederService {
         images: [],
         status: GoodsStatus.PENDING,
         vendor: verifiedVendors[0]._id,
-        createdBy: users.find((u) => u.email === 'john@techstore.com')?._id,
+        createdBy: userMap.get(verifiedVendors[0].user.toString())?._id,
         location: 'Silicon Valley, CA',
         views: 0,
         isAvailable: true,
+        createdAt: new Date(),
       },
       {
         title: 'Antique Furniture Set',
@@ -685,12 +710,13 @@ export class SeederService {
         images: [],
         status: GoodsStatus.PENDING,
         vendor: verifiedVendors[2]._id,
-        createdBy: users.find((u) => u.email === 'mike@realestate.com')?._id,
+        createdBy: userMap.get(verifiedVendors[2].user.toString())?._id,
         location: 'New York, NY',
         views: 0,
         isAvailable: true,
+        createdAt: new Date(),
       },
-
+  
       // Flagged Goods
       {
         title: 'Suspicious Electronics Lot',
@@ -701,19 +727,20 @@ export class SeederService {
         images: [],
         status: GoodsStatus.FLAGGED,
         vendor: verifiedVendors[0]._id,
-        createdBy: users.find((u) => u.email === 'john@techstore.com')?._id,
+        createdBy: userMap.get(verifiedVendors[0].user.toString())?._id,
         location: 'Unknown',
         flagReason: 'Incomplete product information and suspicious pricing',
         flaggedBy: admin?._id,
         flaggedAt: new Date(),
         views: 23,
         isAvailable: false,
+        createdAt: new Date(),
       },
     ];
-
+  
     const goods = await this.goodsModel.insertMany(goodsData);
     console.log(`   ✓ Created ${goods.length} goods`);
-
+  
     // Update vendor goods counts
     for (const vendor of verifiedVendors) {
       const count = goods.filter(
